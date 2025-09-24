@@ -258,3 +258,37 @@ def test_bmm(dims, backend):
         atol=1e-5, 
         rtol=1e-5
     )
+
+@pytest.mark.parametrize("backend", backend_tests)
+def test_view_permute(
+    backend: str
+) -> None:
+    "check non-contiguous grad output for view"
+    requires_grad = True
+
+    q = minitorch.tensor_from_numpy(
+        np.arange(4).reshape(2,2),
+        shared[backend],
+        requires_grad,
+    )
+    k = minitorch.tensor_from_numpy(
+        np.arange(4).reshape(2,2),
+        shared[backend],
+        requires_grad
+    )
+    
+    kv = k.view(2, 2)
+    kT = kv.permute(1,0)
+    res = q @ kT
+    res.backward(minitorch.tensor_from_numpy(
+        np.ones(res.shape),
+        shared[backend],
+        requires_grad,
+    ))
+    
+    np.testing.assert_allclose(
+      k.grad.to_numpy(), 
+      np.array([[2, 4], [2, 4]]),
+      atol=1e-5, rtol=1e-5
+    )
+    

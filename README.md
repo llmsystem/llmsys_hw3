@@ -313,7 +313,7 @@ We recommend you going through the `collate_batch` and `loss_fn` functions in th
 Once all blanks are filled, run:
 
 ```bash
-python project/run_machine_translation.py
+PYTHONPATH=$(pwd) python project/run_machine_translation.py
 ```
 
 The outputs and BLEU scores will be saved in `./workdir_vocab10000_lr0.02_embd256`. You should get a BLEU score around 7 in the first epoch, and around 20 in 10 epochs. *Every epoch takes around an hour, and every training step takes around 25 seconds on A10G.*

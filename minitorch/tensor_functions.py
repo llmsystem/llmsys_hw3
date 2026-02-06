@@ -381,6 +381,10 @@ class View(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         (original,) = ctx.saved_values
+        if not grad_output._tensor.is_contiguous():
+            buf = grad_output.zeros(grad_output.shape)
+            grad_output.f.id_map(grad_output, buf)
+            grad_output = buf
         return (
             minitorch.Tensor.make(
                 grad_output._tensor._storage, original, backend=grad_output.backend

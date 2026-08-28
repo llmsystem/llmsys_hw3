@@ -141,7 +141,7 @@ __device__ void broadcast_index(const int* big_index, const int* big_shape, cons
             out_index[i] = 0;
         }
     }
-}
+} 
 
 
 __global__ void MatrixMultiplyKernel(

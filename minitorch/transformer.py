@@ -30,7 +30,7 @@ class MultiHeadAttention(Module):
             p_dropout: Dropout ratio for dropout layer
             causal: If True, then apply a causal mask during self-attention
             bias: If True, then apply a bias in Linear layers
-        
+
         Attributes:
             q_projection: Linear layer projecting input to Q matrix
             k_projection: Linear layer projecting input to K matrix
@@ -39,7 +39,7 @@ class MultiHeadAttention(Module):
             dropout: Dropout layer
         """
         self.backend = backend
-        self.n_embd = n_embd 
+        self.n_embd = n_embd
         self.n_head = n_head
         self.causal = causal
         self.attn_hidden_dim = n_embd // n_head
@@ -56,7 +56,7 @@ class MultiHeadAttention(Module):
     def create_causal_mask(self, seq_len):
         """
         Create a causal mask for self-attention to prevent information leakage.
-        
+
         Generates a triangular mask where each position can only attend to previous
         positions and itself. Upper triangle contains -inf, lower triangle contains 0.
 
@@ -75,7 +75,7 @@ class MultiHeadAttention(Module):
     def project_to_query_key_value(self, x):
         """
         Project input embeddings to Query, Key, and Value matrices for self-attention.
-        
+
         Args:
             x (Tensor): Input embeddings of shape (batch_size, seq_len, n_embd)
 
@@ -90,11 +90,11 @@ class MultiHeadAttention(Module):
         raise NotImplementedError
         ### END ASSIGN3_3
         return q, kT, v
-    
+
     def self_attention(self, q, kT, v):
         """
         Compute self-attention: softmax((q @ kT) / sqrt(attn_hidden_dim)) @ v.
-        
+
         Args:
             q (Tensor): Query matrix of shape (batch_size, num_heads, seq_len, attn_hidden_dim)
             kT (Tensor): Transposed key matrix of shape (batch_size, num_heads, attn_hidden_dim, seq_len)
@@ -108,7 +108,7 @@ class MultiHeadAttention(Module):
         _, _, _, v_dim = v.shape
         assert q_dim == k_dim == v_dim
         result = None
-        
+
         ### BEGIN ASSIGN3_3
         raise NotImplementedError
         ### END ASSIGN3_3
@@ -118,7 +118,7 @@ class MultiHeadAttention(Module):
     def forward(self, x):
         """
         Compute multi-head attention with optional causal masking.
-        
+
         Args:
             x (Tensor): Input tensor of shape (batch_size, seq_len, n_embd)
 
@@ -136,29 +136,27 @@ class FeedForward(Module):
         super().__init__()
         """
         Initialize a feed-forward network module.
-        
+
         Args:
             n_embd (int): Input and output dimension
             middle_dim (int): Hidden layer dimension, default 256
             p_dropout (float): Dropout probability, default 0.1
             bias (bool): Whether to use bias in linear layers, default True
             backend (TensorBackend): Backend for tensor operations
-            
+
         Attributes:
             linear_in (Linear): First linear layer
             linear_out (Linear): Second linear layer
             dropout (Dropout): Dropout layer
         """
-        ### BEGIN ASSIGN3_3
         self.linear_in  = Linear(n_embd, middle_dim, bias=bias, backend=backend)
         self.linear_out = Linear(middle_dim, n_embd, bias=bias, backend=backend)
         self.dropout    = Dropout(p_dropout)
-        ### END ASSIGN3_3
 
     def forward(self, x):
         """
         Forward pass through feed-forward network with  activation and dropout.
-        
+
         Args:
             x (Tensor): Input tensor of shape (batch_size, seq_len, n_embd)
 
@@ -167,20 +165,18 @@ class FeedForward(Module):
         """
         batch_size, seq_len, n_embd = x.shape
 
-        ### BEGIN ASSIGN3_3
         x = GELU(self.linear_in(x.view(batch_size * seq_len, n_embd)))
         x = self.dropout(self.linear_out(x)).view(batch_size, seq_len, n_embd)
-        ### END ASSIGN3_3
 
         return x
-    
+
 
 class TransformerLayer(Module):
     def __init__(self, n_embd: int, n_head: int, p_dropout: float=0.1, ln_eps: float=1e-5, bias: bool=True, backend: TensorBackend=None):
         super().__init__()
         """
         Initialize a transformer layer with pre-layer normalization.
-        
+
         Args:
             n_embd (int): Embedding dimension
             n_head (int): Number of attention heads
@@ -188,7 +184,7 @@ class TransformerLayer(Module):
             ln_eps (float): Layer normalization epsilon, default 1e-5
             bias (bool): Whether to use bias in linear layers, default True
             backend (TensorBackend): Backend for tensor operations
-            
+
         Attributes:
             ln_1 (LayerNorm1d): First layer normalization before attention
             ln_2 (LayerNorm1d): Second layer normalization after attention
@@ -206,35 +202,35 @@ class TransformerLayer(Module):
     def forward(self, x):
         """
         Forward pass through transformer layer with pre-layer normalization.
-        
+
         Args:
             x (Tensor): Input tensor of shape (batch_size, seq_len, n_embd)
-        
+
         Returns:
             Tensor: Output tensor of shape (batch_size, seq_len, n_embd)
         """
         batch_size, seq_len, n_embd = x.shape
-        ### BEGIN YOUR SOLUTION
+        ### BEGIN ASSIGN3_3
         raise NotImplementedError
-        ### END YOUR SOLUTION
+        ### END ASSIGN3_3
 
 
 class DecoderLM(Module):
     def __init__(
-        self, 
+        self,
         n_vocab: int,
         n_embd: int,
         n_head: int,
         n_positions: int,
         p_dropout: float=0.1,
-        ln_eps: float=1e-5, 
+        ln_eps: float=1e-5,
         bias: bool=True,
         backend: TensorBackend=None
     ):
         super().__init__()
         """
         Initialize a decoder-only transformer language model.
-        
+
         Args:
             n_vocab (int): Vocabulary size
             n_embd (int): Embedding dimension
@@ -244,7 +240,7 @@ class DecoderLM(Module):
             ln_eps (float): Layer normalization epsilon, default 1e-5
             bias (bool): Whether to use bias in linear layers, default True
             backend (TensorBackend): Backend for tensor operations
-            
+
         Attributes:
             token_embeddings (Embedding): Token embedding layer
             position_embeddings (Embedding): Position embedding layer
@@ -271,22 +267,21 @@ class DecoderLM(Module):
         # self.ln = 
         # self.lm_head = 
         ### END ASSIGN3_3
-    
+
     def forward(self, idx):
         """
         Forward pass through decoder-only transformer language model.
-        
+
         Args:
             idx (Tensor): Input token indices of shape (batch_size, seq_len)
-        
+
         Returns:
             Tensor: Logits of shape (batch_size, seq_len, n_vocab)
         """
-        
+
         batch_size, seq_len = idx.shape
 
-        ### BEGIN ASSIGN3_3
-        raise NotImplementedError
+        # Hint: The forward pass should follow these steps:
         # 1. Get token embeddings of shape (batch_size, seq_len, n_embd)
         # 2. Create positional embeddings of shape (1, seq_len, n_embd):
         #    - Create position ids tensor [0, 1, 2, ..., seq_len-1] of shape (1, seq_len)
@@ -297,4 +292,7 @@ class DecoderLM(Module):
         # 5. Pass through transformer layers (t_layer_1 to t_layer_4)
         # 6. Apply final layer normalization
         # 7. Project to vocabulary size using lm_head
+
+        ### BEGIN ASSIGN3_3
+        raise NotImplementedError
         ### END ASSIGN3_3

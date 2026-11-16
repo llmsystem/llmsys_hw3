@@ -165,7 +165,7 @@ class FeedForward(Module):
         """
         batch_size, seq_len, n_embd = x.shape
 
-        x = GELU(self.linear_in(x.view(batch_size * seq_len, n_embd)))
+        x = GELU(self.linear_in(x.contiguous().view(batch_size * seq_len, n_embd)))
         x = self.dropout(self.linear_out(x)).view(batch_size, seq_len, n_embd)
 
         return x

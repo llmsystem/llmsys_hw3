@@ -16,7 +16,6 @@ sys.path.append("./")
 
 import minitorch
 from minitorch import DecoderLM
-from minitorch.cuda_kernel_ops import CudaKernelOps
 
 
 def get_dataset(dataset_name, model_max_length):
@@ -172,7 +171,14 @@ def loss_fn(batch, model):
 
     Returns:
         Tensor: Average loss across all target tokens
+
+    Raises:
+        ValueError: If the batch contains no target tokens after truncation.
     """
+
+    target_token_count = batch['label_token_weights'].sum()
+    if target_token_count.item() == 0:
+        raise ValueError("Cannot compute loss for a batch with no target tokens after truncation")
 
     idx = batch['input_ids']
     idx.requires_grad_(True)
@@ -193,7 +199,7 @@ def loss_fn(batch, model):
         target=targets
     )
 
-    return ((loss * label_token_weights).sum() / label_token_weights.sum())
+    return ((loss * label_token_weights).sum() / target_token_count)
 
 
 def train(model, optimizer, examples, n_samples, collate_fn, batch_size, desc):
@@ -365,6 +371,8 @@ def main(
         n_embd (int): Embedding dimension, default 256
         seed (int): Random seed, default 11111
     """
+
+    from minitorch.cuda_kernel_ops import CudaKernelOps
 
     np.random.seed(seed)
     random.seed(seed)

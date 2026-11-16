@@ -50,11 +50,11 @@ def avgpool2d(input: Tensor, kernel: Tuple[int, int]) -> Tensor:
     return x.mean(dim=4).view(batch, channel, new_height, new_width)
 
 if numba.cuda.is_available():
-    # max_reduce = CudaOps.reduce(operators.max, -1e9)
+    # max_reduce = CudaOps.reduce(operators.max, float("-inf"))
     from minitorch.cuda_kernel_ops import CudaKernelOps
-    max_reduce = CudaKernelOps.reduce(operators.max, -1e9)
+    max_reduce = CudaKernelOps.reduce(operators.max, float("-inf"))
 else:
-    max_reduce = FastOps.reduce(operators.max, -1e9)
+    max_reduce = FastOps.reduce(operators.max, float("-inf"))
 
 
 def argmax(input: Tensor, dim: int) -> Tensor:
